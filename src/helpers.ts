@@ -18,3 +18,11 @@ export function buildNMGrid(N: number, M: number): number[][] {
     .fill(0)
     .map(() => Array(M).fill(0));
 }
+
+export function revealedCellsCount(grid: number[][]): number {
+  return arraySum(grid.map((r) => arraySum(r)));
+}
+
+function arraySum(arr: number[]): number {
+  return arr.reduce((acc, el) => acc + el, 0);
+}

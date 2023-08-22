@@ -26,3 +26,21 @@
   background-color: beige;
   color: beige;
 }
+
+.GameStatus {
+  font-weight: bold;
+  padding: 12px;
+  visibility: hidden;
+}
+
+.GameStatus.Failure {
+  color: rgb(127, 33, 33);
+}
+
+.GameStatus.Success {
+  color: rgb(45, 219, 45);
+}
+
+.GameStatus.Failure, .GameStatus.Success {
+  visibility: visible;
+}

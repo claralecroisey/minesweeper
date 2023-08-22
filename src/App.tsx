@@ -29,7 +29,7 @@ function App() {
       </div>
       <br />
       <div className="Grid">
-        <Grid N={n} M={m} />
+        <Grid N={n} M={m} NB_BOMBS={n - 1} />
       </div>
     </div>
   );
