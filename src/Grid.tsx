@@ -77,10 +77,14 @@ export function Grid({ N, M, minesCount }: GridProps) {
         }
       }
 
-      // RIGHT CLICK: flag cell
+      // RIGHT CLICK: flag or unflag cell
     } else if (e.type === 'contextmenu') {
       e.preventDefault();
-      updatedGrid[row][col] = CellStatus.Flagged;
+      if (updatedGrid[row][col] !== CellStatus.Flagged) {
+        updatedGrid[row][col] = CellStatus.Flagged;
+      } else {
+        updatedGrid[row][col] = CellStatus.Hidden;
+      }
     }
 
     setPlayGrid(updatedGrid);
