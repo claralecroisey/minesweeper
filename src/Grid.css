@@ -1,0 +1,23 @@
+.Grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.Row {
+  display: flex;
+}
+
+.Cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  width: 32px;
+  border: 1px solid black;
+
+}
+
+.Bomb {
+  background-color: black;
+  color: white;
+}
