@@ -6,7 +6,7 @@ import mine from './assets/mine.png';
 interface GridProps {
   N: number;
   M: number;
-  NB_BOMBS: number;
+  minesCount: number;
 }
 
 enum GameStatus {
@@ -15,28 +15,28 @@ enum GameStatus {
   Failure = 'Failure'
 }
 
-export function Grid({ N, M, NB_BOMBS }: GridProps) {
+export function Grid({ N, M, minesCount }: GridProps) {
   const [referenceGrid, setReferenceGrid] = useState<number[][] | null>(null);
   const [playGrid, setPlayGrid] = useState<number[][] | null>(null);
-  const [bombsCoordinates, setBombsCoordinates] = useState<number[][] | null>(null);
+  const [minesCoordinates, setMinesCoordinates] = useState<number[][] | null>(null);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Running);
 
   useEffect(() => {
-    const bombsCoordinates = generateRandomPairs(NB_BOMBS, N, M);
-    setBombsCoordinates(bombsCoordinates);
-    setReferenceGrid(buildGrid(bombsCoordinates, N, M));
+    const minesCoordinates = generateRandomPairs(minesCount, N, M);
+    setMinesCoordinates(minesCoordinates);
+    setReferenceGrid(buildGrid(minesCoordinates, N, M));
     setPlayGrid(buildNMGrid(N, M));
   }, [N, M]);
 
   function handleCellClick(cellValue: number, row: number, col: number) {
-    if (playGrid === null || bombsCoordinates === null) return;
+    if (playGrid === null || minesCoordinates === null) return;
     if (playGrid[row][col] === 1) return; // Already revealed
 
     const updatedGrid = playGrid.map((row) => [...row]);
 
     if (cellValue === -1) {
-      // It's a BOMB! => Game over / Reveal all bombs
-      bombsCoordinates.forEach(([row, col]) => {
+      // It's a BOMB! => Game over / Reveal all mines
+      minesCoordinates.forEach(([row, col]) => {
         updatedGrid[row][col] = 1;
       });
       setGameStatus(GameStatus.Failure);
@@ -45,7 +45,7 @@ export function Grid({ N, M, NB_BOMBS }: GridProps) {
       updatedGrid[row][col] = 1;
 
       // Check if user won
-      if (revealedCellsCount(updatedGrid) === N * M - NB_BOMBS) {
+      if (revealedCellsCount(updatedGrid) === N * M - minesCount) {
         setGameStatus(GameStatus.Success);
       }
     }
@@ -80,7 +80,7 @@ export function Grid({ N, M, NB_BOMBS }: GridProps) {
               <div
                 className={
                   'Cell' +
-                  `${isAMine(cellValue) ? ' Bomb' : ''}` +
+                  `${isAMine(cellValue) ? ' Mine' : ''}` +
                   `${!isRevealed(rowIndex, colIndex) ? ' Hidden' : ''}`
                 }
                 key={colIndex}
@@ -102,21 +102,21 @@ export function Grid({ N, M, NB_BOMBS }: GridProps) {
   );
 }
 
-function buildGrid(bombsCoordinates: number[][], n: number, m: number): number[][] {
+function buildGrid(minesCoordinates: number[][], n: number, m: number): number[][] {
   const _grid = buildNMGrid(n, m);
 
-  bombsCoordinates.forEach(([row, col]) => {
-    // Mark as bomb
+  minesCoordinates.forEach(([row, col]) => {
+    // Mark as mine
     _grid[row][col] = -1;
 
-    // Fill neighbors cells with adjacent bombs count
+    // Fill neighbors cells with adjacent mines count
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
-        if (i === 0 && j === 0) continue; // The bomb itself
+        if (i === 0 && j === 0) continue; // The mine itself
         const r = row + i;
         const c = col + j;
         if (!(r >= 0 && r < n && c >= 0 && c < m)) continue;
-        if (_grid[r][c] === -1) continue; // A neighboring bomb => leave it as -1
+        if (_grid[r][c] === -1) continue; // A neighboring mine => leave it as -1
         _grid[r][c] += 1;
       }
     }
