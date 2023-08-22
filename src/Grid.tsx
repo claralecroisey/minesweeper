@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useState, useEffect } from 'react';
 import './Grid.css';
 import { buildNMGrid, generateRandomPairs, revealedCellsCount } from './helpers';
@@ -34,17 +35,17 @@ export function Grid({ N, M, minesCount }: GridProps) {
   }, [N, M]);
 
   function handleCellClick(cellValue: number, row: number, col: number) {
-    if (playGrid === null || minesCoordinates === null) return;
-    if (playGrid[row][col] === 1) return; // Already revealed
-
-    const updatedGrid = playGrid.map((row) => [...row]);
+    if (playGrid![row][col] === 1) return; // Already revealed
+    const updatedGrid = playGrid!.map((row) => [...row]);
 
     if (cellValue === -1) {
       // It's a BOMB! => Game over / Reveal all mines
-      minesCoordinates.forEach(([row, col]) => {
+      minesCoordinates!.forEach(([row, col]) => {
         updatedGrid[row][col] = 1;
       });
       setGameStatus(GameStatus.Failure);
+    } else if (cellValue === 0) {
+      revealCellsRecursively(row, col, updatedGrid);
     } else {
       // Reveal that cell only
       updatedGrid[row][col] = 1;
@@ -58,9 +59,30 @@ export function Grid({ N, M, minesCount }: GridProps) {
     setPlayGrid(updatedGrid);
   }
 
+  function revealCellsRecursively(
+    startingRow: number,
+    startingCol: number,
+    updatedGrid: number[][]
+  ) {
+    function reveal(r: number, c: number) {
+      if (r < 0 || r >= N || c < 0 || c >= M) return; // Out of range => ignore
+      if (updatedGrid[r][c] === 1) return; // Already revealed
+
+      updatedGrid[r][c] = 1; // Reveal grid
+
+      if (referenceGrid![r][c] !== 0) return; // Stop
+      for (let i = r - 1; i <= r + 1; i++) {
+        for (let j = c - 1; j <= c + 1; j++) {
+          reveal(i, j);
+        }
+      }
+    }
+
+    reveal(startingRow, startingCol);
+  }
+
   function isRevealed(row: number, col: number): boolean {
-    if (playGrid === null) return false;
-    return playGrid[row][col] === 1;
+    return playGrid![row][col] === 1;
   }
 
   function isAMine(cellValue: number) {
