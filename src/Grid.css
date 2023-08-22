@@ -17,7 +17,12 @@
 
 }
 
-.Bomb {
+.Cell.Bomb {
   background-color: black;
   color: white;
+}
+
+.Cell.Hidden {
+  background-color: beige;
+  color: beige;
 }

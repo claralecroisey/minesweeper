@@ -12,3 +12,9 @@ export function generateRandomPairs(pairsCount: number, n: number, m: number) {
     return [i, j];
   });
 }
+
+export function buildNMGrid(N: number, M: number): number[][] {
+  return Array(N)
+    .fill(0)
+    .map(() => Array(M).fill(0));
+}

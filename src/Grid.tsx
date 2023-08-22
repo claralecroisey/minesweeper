@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Grid.css';
-import { generateRandomPairs } from './helpers';
+import { buildNMGrid, generateRandomPairs } from './helpers';
 
 interface GridProps {
   N: number;
@@ -8,21 +8,41 @@ interface GridProps {
 }
 
 export function Grid({ N, M }: GridProps) {
-  const [grid, setGrid] = useState<number[][] | null>(null);
+  const [referenceGrid, setReferenceGrid] = useState<number[][] | null>(null);
+  const [playGrid, setPlayGrid] = useState<number[][] | null>(null);
 
   useEffect(() => {
     const NB_BOMBS = N;
-    setGrid(buildGrid(NB_BOMBS, N, M));
+    setReferenceGrid(buildGrid(NB_BOMBS, N, M));
+    setPlayGrid(buildNMGrid(N, M));
   }, [N, M]);
 
-  return grid === null ? (
+  function handleCellClick(row: number, col: number) {
+    if (playGrid === null) return;
+
+    // Reveal
+    const updatedGrid = playGrid.map((row) => [...row]);
+    updatedGrid[row][col] = 1;
+    setPlayGrid(updatedGrid);
+  }
+
+  return referenceGrid === null || playGrid === null ? (
     <p>Initialising...</p>
   ) : (
     <div className="Grid">
-      {grid.map((row, rowIndex) => (
+      {referenceGrid.map((row, rowIndex) => (
         <div className="Row" key={rowIndex}>
           {row.map((cellValue, colIndex) => (
-            <div className={'Cell' + `${cellValue === -1 ? ' Bomb' : ''}`} key={colIndex}>
+            <div
+              className={
+                'Cell' +
+                `${cellValue === -1 ? ' Bomb' : ''}` +
+                `${playGrid[rowIndex][colIndex] === 0 ? ' Hidden' : ''}`
+              }
+              key={colIndex}
+              onClick={() => {
+                handleCellClick(rowIndex, colIndex);
+              }}>
               {cellValue}
             </div>
           ))}
@@ -33,10 +53,7 @@ export function Grid({ N, M }: GridProps) {
 }
 
 function buildGrid(bombsCount: number, n: number, m: number): number[][] {
-  const _grid: number[][] = Array(n)
-    .fill(0)
-    .map(() => Array(m).fill(0));
-
+  const _grid = buildNMGrid(n, m);
   const bombsCoordinates = generateRandomPairs(bombsCount, n, m);
 
   bombsCoordinates.forEach(([row, col]) => {
