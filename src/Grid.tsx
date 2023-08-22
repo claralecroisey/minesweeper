@@ -118,7 +118,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
                 }}>
                 {isAMine(cellValue) && isRevealed(rowIndex, colIndex) ? (
                   <img className="Mine" alt="mine" src={mine} />
-                ) : (
+                ) : cellValue === 0 ? null : (
                   cellValue
                 )}
               </div>
