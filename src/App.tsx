@@ -33,9 +33,7 @@ function App() {
         ))}
       </div>
       <br />
-      <div className="Grid">
-        <Grid N={LEVELS[level].N} M={LEVELS[level].N} minesCount={LEVELS[level].minesCount} />
-      </div>
+      <Grid N={LEVELS[level].N} M={LEVELS[level].N} minesCount={LEVELS[level].minesCount} />
     </div>
   );
 }

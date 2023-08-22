@@ -39,6 +39,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
   const [playGrid, setPlayGrid] = useState<CellStatus[][] | null>(null);
   const [minesCoordinates, setMinesCoordinates] = useState<number[][] | null>(null);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Running);
+  const [flagsCount, setFlagsCount] = useState(0);
 
   function init() {
     const minesCoordinates = generateRandomPairs(minesCount, N, M);
@@ -46,6 +47,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
     setReferenceGrid(buildGrid(minesCoordinates, N, M));
     setPlayGrid(buildNMGrid(N, M, CellStatus.Hidden));
     setGameStatus(GameStatus.Running);
+    setFlagsCount(0);
   }
 
   useEffect(() => {
@@ -83,8 +85,10 @@ export function Grid({ N, M, minesCount }: GridProps) {
       e.preventDefault();
       if (updatedGrid[row][col] !== CellStatus.Flagged) {
         updatedGrid[row][col] = CellStatus.Flagged;
+        setFlagsCount(flagsCount + 1);
       } else {
         updatedGrid[row][col] = CellStatus.Hidden;
+        setFlagsCount(flagsCount - 1);
       }
     }
 
@@ -133,6 +137,12 @@ export function Grid({ N, M, minesCount }: GridProps) {
     <div className="GridContainer">
       <header>
         <div className="MinesCount">MINES: {minesCount}</div>
+        <div className="FlagsCount">
+          <img src={flag} /> {flagsCount}
+          <span className="TooltipText">
+            Right click on the cell to add a flag on a potential mine!
+          </span>
+        </div>
         <img className="Restart" src={restart} alt="Restart" onClick={init} />
       </header>
       <div className="GameStatusContainer">
