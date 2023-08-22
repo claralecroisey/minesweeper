@@ -11,10 +11,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 18px;
   height: 32px;
   width: 32px;
   border: 1px solid black;
-
+  cursor: pointer;
 }
 
 .Cell.Bomb {
@@ -27,14 +28,20 @@
   color: beige;
 }
 
+.Mine {
+  height: 32px;
+  width: 32px;
+}
+
 .GameStatus {
   font-weight: bold;
+  font-size: 32px;
   padding: 12px;
   visibility: hidden;
 }
 
 .GameStatus.Failure {
-  color: rgb(127, 33, 33);
+  color: rgb(164, 27, 27);
 }
 
 .GameStatus.Success {

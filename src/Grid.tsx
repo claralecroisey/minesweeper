@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Grid.css';
 import { buildNMGrid, generateRandomPairs, revealedCellsCount } from './helpers';
+import mine from './assets/mine.png';
 
 interface GridProps {
   N: number;
@@ -52,6 +53,15 @@ export function Grid({ N, M, NB_BOMBS }: GridProps) {
     setPlayGrid(updatedGrid);
   }
 
+  function isRevealed(row: number, col: number): boolean {
+    if (playGrid === null) return false;
+    return playGrid[row][col] === 1;
+  }
+
+  function isAMine(cellValue: number) {
+    return cellValue === -1;
+  }
+
   return referenceGrid === null || playGrid === null ? (
     <p>Initialising...</p>
   ) : (
@@ -70,15 +80,19 @@ export function Grid({ N, M, NB_BOMBS }: GridProps) {
               <div
                 className={
                   'Cell' +
-                  `${cellValue === -1 ? ' Bomb' : ''}` +
-                  `${playGrid[rowIndex][colIndex] === 0 ? ' Hidden' : ''}`
+                  `${isAMine(cellValue) ? ' Bomb' : ''}` +
+                  `${!isRevealed(rowIndex, colIndex) ? ' Hidden' : ''}`
                 }
                 key={colIndex}
                 onClick={() => {
                   gameStatus === GameStatus.Running &&
                     handleCellClick(cellValue, rowIndex, colIndex);
                 }}>
-                {cellValue}
+                {isAMine(cellValue) && isRevealed(rowIndex, colIndex) ? (
+                  <img className="Mine" alt="mine" src={mine} />
+                ) : (
+                  cellValue
+                )}
               </div>
             ))}
           </div>
