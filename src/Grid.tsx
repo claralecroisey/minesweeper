@@ -26,6 +26,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
     setMinesCoordinates(minesCoordinates);
     setReferenceGrid(buildGrid(minesCoordinates, N, M));
     setPlayGrid(buildNMGrid(N, M));
+    setGameStatus(GameStatus.Running);
   }
 
   useEffect(() => {
