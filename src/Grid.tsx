@@ -4,6 +4,7 @@ import './Grid.css';
 import { CellStatus, buildNMGrid, generateRandomPairs, revealedCellsCount } from './helpers';
 import mine from './assets/mine.png';
 import flag from './assets/flag.png';
+import restart from './assets/restart.png';
 
 interface GridProps {
   N: number;
@@ -129,15 +130,22 @@ export function Grid({ N, M, minesCount }: GridProps) {
   return referenceGrid === null || playGrid === null ? (
     <p>Initialising...</p>
   ) : (
-    <>
-      <button onClick={init}>Restart</button>
-      <div className={`GameStatus ${gameStatus}`}>
-        {gameStatus === GameStatus.Failure
-          ? 'GAME OVER'
-          : gameStatus === GameStatus.Success
-          ? 'YOU WON!!!'
-          : 'Running'}
+    <div className="GridContainer">
+      <header>
+        <div className="MinesCount">MINES: {minesCount}</div>
+        <img className="Restart" src={restart} alt="Restart" onClick={init} />
+      </header>
+      <div className="GameStatusContainer">
+        <div className={`GameStatus ${gameStatus}`}>
+          {gameStatus === GameStatus.Failure
+            ? 'GAME OVER'
+            : gameStatus === GameStatus.Success
+            ? 'YOU WON!!!'
+            : 'Running'}
+        </div>
       </div>
+      <br />
+      <br />
       <div className="Grid">
         {referenceGrid.map((row, rowIndex) => (
           <div className="Row" key={rowIndex}>
@@ -170,7 +178,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }
 

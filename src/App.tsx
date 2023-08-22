@@ -19,12 +19,11 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Minesweeper</h1>
-      </header>
+      <div className="App-title"># Minesweeper</div>
       <div className="LevelButtonsContainer">
         {Object.keys(LEVELS).map((l) => (
           <button
+            className={l}
             key={l}
             onClick={() => {
               setLevel(l as Level);
@@ -33,8 +32,6 @@ function App() {
           </button>
         ))}
       </div>
-      <br />
-      <div>NB MINES: {LEVELS[level].minesCount}</div>
       <br />
       <div className="Grid">
         <Grid N={LEVELS[level].N} M={LEVELS[level].N} minesCount={LEVELS[level].minesCount} />

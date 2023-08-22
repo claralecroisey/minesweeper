@@ -34,14 +34,22 @@
 }
 
 .GameStatus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
   font-weight: bold;
-  font-size: 32px;
-  padding: 12px;
+  font-size: 96px;
   visibility: hidden;
+  font-family: 'KarmaFuture';
+  background-color: black;
+  box-shadow: 8px 6px 1px rgb(49, 47, 47);
+  padding: 8px 16px;
 }
 
 .GameStatus.Failure {
-  color: rgb(164, 27, 27);
+  color: rgb(190, 21, 21);
 }
 
 .GameStatus.Success {
@@ -50,4 +58,22 @@
 
 .GameStatus.Failure, .GameStatus.Success {
   visibility: visible;
+}
+
+img.Restart {
+  height: 32px;
+  width: 32px;
+  cursor: pointer;
+}
+
+.MinesCount {
+  font-family: 'KarmaFuture';
+  font-size: 32px;
+}
+
+.GridContainer header {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 32px;
 }
