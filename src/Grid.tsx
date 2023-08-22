@@ -23,8 +23,16 @@ const COLORS: Record<number, string> = {
   4: 'darkblue'
 };
 
+/***
+ * GRID WITH N ROWS AND M COLUMNS
+ * Cell values:
+ * - -1 => Mine
+ * - >= 0 => NB of adjacent mines, used to identify mines
+ */
 export function Grid({ N, M, minesCount }: GridProps) {
+  // Grid containing the actual values
   const [referenceGrid, setReferenceGrid] = useState<number[][] | null>(null);
+  // N*M grid to track revealed cells (0 = not revealed, 1 = revealed)
   const [playGrid, setPlayGrid] = useState<number[][] | null>(null);
   const [minesCoordinates, setMinesCoordinates] = useState<number[][] | null>(null);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Running);
@@ -42,22 +50,23 @@ export function Grid({ N, M, minesCount }: GridProps) {
   }, [N, M]);
 
   function handleCellClick(cellValue: number, row: number, col: number) {
-    if (playGrid![row][col] === 1) return; // Already revealed
+    if (isRevealed(row, col)) return; // Already revealed
     const updatedGrid = playGrid!.map((row) => [...row]);
 
-    if (cellValue === -1) {
-      // It's a BOMB! => Game over / Reveal all mines
+    if (isAMine(cellValue)) {
+      // It's a MINE! => Game over / Reveal all mines
+      setGameStatus(GameStatus.Failure);
       minesCoordinates!.forEach(([row, col]) => {
         updatedGrid[row][col] = 1;
       });
-      setGameStatus(GameStatus.Failure);
     } else if (cellValue === 0) {
+      // No adjacent cells, reveal adjacent cells recursively until it reaches cells with adjacent bombs or edges
       revealCellsRecursively(row, col, updatedGrid);
     } else {
       // Reveal that cell only
       updatedGrid[row][col] = 1;
 
-      // Check if user won
+      // Check if user won (all cells revealed except mines)
       if (revealedCellsCount(updatedGrid) === N * M - minesCount) {
         setGameStatus(GameStatus.Success);
       }
@@ -146,11 +155,9 @@ function buildGrid(minesCoordinates: number[][], n: number, m: number): number[]
     _grid[row][col] = -1;
 
     // Fill neighbors cells with adjacent mines count
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-        if (i === 0 && j === 0) continue; // The mine itself
-        const r = row + i;
-        const c = col + j;
+    for (let r = row - 1; r <= row + 1; r++) {
+      for (let c = col - 1; c <= col + 1; c++) {
+        if (r === row && c === col) continue; // The mine itself
         if (!(r >= 0 && r < n && c >= 0 && c < m)) continue;
         if (_grid[r][c] === -1) continue; // A neighboring mine => leave it as -1
         _grid[r][c] += 1;
