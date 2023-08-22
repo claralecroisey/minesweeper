@@ -4,3 +4,10 @@
   flex-direction: column;
   align-items: center;
 }
+
+.LevelButtonsContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
