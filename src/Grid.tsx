@@ -15,6 +15,13 @@ enum GameStatus {
   Success = 'Success',
   Failure = 'Failure'
 }
+const COLORS: Record<number, string> = {
+  0: 'black',
+  1: 'blue',
+  2: 'green',
+  3: 'red',
+  4: 'darkblue'
+};
 
 export function Grid({ N, M, minesCount }: GridProps) {
   const [referenceGrid, setReferenceGrid] = useState<number[][] | null>(null);
@@ -111,6 +118,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
                   `${isAMine(cellValue) ? ' Mine' : ''}` +
                   `${!isRevealed(rowIndex, colIndex) ? ' Hidden' : ''}`
                 }
+                style={isRevealed(rowIndex, colIndex) ? { color: COLORS[cellValue] } : {}}
                 key={colIndex}
                 onClick={() => {
                   gameStatus === GameStatus.Running &&
