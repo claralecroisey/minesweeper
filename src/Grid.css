@@ -25,10 +25,9 @@
 
 .Cell.Hidden {
   background-color: beige;
-  color: beige;
 }
 
-.Mine {
+.Mine, .Flag {
   height: 32px;
   width: 32px;
 }

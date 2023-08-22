@@ -1,3 +1,9 @@
+export enum CellStatus {
+  Hidden = 'Hidden',
+  Revealed = 'Revealed',
+  Flagged = 'Flagged'
+}
+
 export function generateRandomPairs(pairsCount: number, n: number, m: number) {
   const uniquePairs = new Set<string>();
 
@@ -13,16 +19,13 @@ export function generateRandomPairs(pairsCount: number, n: number, m: number) {
   });
 }
 
-export function buildNMGrid(N: number, M: number): number[][] {
+export function buildNMGrid<T>(N: number, M: number, initialValue: T): T[][] {
   return Array(N)
-    .fill(0)
-    .map(() => Array(M).fill(0));
+    .fill(initialValue)
+    .map(() => Array(M).fill(initialValue));
 }
 
-export function revealedCellsCount(grid: number[][]): number {
-  return arraySum(grid.map((r) => arraySum(r)));
-}
-
-function arraySum(arr: number[]): number {
-  return arr.reduce((acc, el) => acc + el, 0);
+export function revealedCellsCount(grid: CellStatus[][]): number {
+  const counts = grid.map((r) => r.filter((el) => el === CellStatus.Revealed).length);
+  return counts.reduce((acc, count) => acc + count, 0);
 }

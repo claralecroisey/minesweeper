@@ -34,6 +34,8 @@ function App() {
         ))}
       </div>
       <br />
+      <div>NB MINES: {LEVELS[level].minesCount}</div>
+      <br />
       <div className="Grid">
         <Grid N={LEVELS[level].N} M={LEVELS[level].N} minesCount={LEVELS[level].minesCount} />
       </div>

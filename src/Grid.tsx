@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useState, useEffect } from 'react';
 import './Grid.css';
-import { buildNMGrid, generateRandomPairs, revealedCellsCount } from './helpers';
+import { CellStatus, buildNMGrid, generateRandomPairs, revealedCellsCount } from './helpers';
 import mine from './assets/mine.png';
+import flag from './assets/flag.png';
 
 interface GridProps {
   N: number;
@@ -15,6 +16,7 @@ enum GameStatus {
   Success = 'Success',
   Failure = 'Failure'
 }
+
 const COLORS: Record<number, string> = {
   0: 'black',
   1: 'blue',
@@ -32,8 +34,8 @@ const COLORS: Record<number, string> = {
 export function Grid({ N, M, minesCount }: GridProps) {
   // Grid containing the actual values
   const [referenceGrid, setReferenceGrid] = useState<number[][] | null>(null);
-  // N*M grid to track revealed cells (0 = not revealed, 1 = revealed)
-  const [playGrid, setPlayGrid] = useState<number[][] | null>(null);
+  // N*M grid to track revealed / hidden / flagged cells
+  const [playGrid, setPlayGrid] = useState<CellStatus[][] | null>(null);
   const [minesCoordinates, setMinesCoordinates] = useState<number[][] | null>(null);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Running);
 
@@ -41,7 +43,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
     const minesCoordinates = generateRandomPairs(minesCount, N, M);
     setMinesCoordinates(minesCoordinates);
     setReferenceGrid(buildGrid(minesCoordinates, N, M));
-    setPlayGrid(buildNMGrid(N, M));
+    setPlayGrid(buildNMGrid(N, M, CellStatus.Hidden));
     setGameStatus(GameStatus.Running);
   }
 
@@ -49,27 +51,36 @@ export function Grid({ N, M, minesCount }: GridProps) {
     init();
   }, [N, M]);
 
-  function handleCellClick(cellValue: number, row: number, col: number) {
+  function handleCellClick(e: any, cellValue: number, row: number, col: number) {
     if (isRevealed(row, col)) return; // Already revealed
+
     const updatedGrid = playGrid!.map((row) => [...row]);
 
-    if (isAMine(cellValue)) {
-      // It's a MINE! => Game over / Reveal all mines
-      setGameStatus(GameStatus.Failure);
-      minesCoordinates!.forEach(([row, col]) => {
-        updatedGrid[row][col] = 1;
-      });
-    } else if (cellValue === 0) {
-      // No adjacent cells, reveal adjacent cells recursively until it reaches cells with adjacent bombs or edges
-      revealCellsRecursively(row, col, updatedGrid);
-    } else {
-      // Reveal that cell only
-      updatedGrid[row][col] = 1;
+    // LEFT CLICK: reveal cell
+    if (e.type === 'click') {
+      if (isAMine(cellValue)) {
+        // It's a MINE! => Game over / Reveal all mines
+        setGameStatus(GameStatus.Failure);
+        minesCoordinates!.forEach(([row, col]) => {
+          updatedGrid[row][col] = CellStatus.Revealed;
+        });
+      } else if (cellValue === 0) {
+        // No adjacent cells, reveal adjacent cells recursively until it reaches cells with adjacent bombs or edges
+        revealCellsRecursively(row, col, updatedGrid);
+      } else {
+        // Reveal that cell only
+        updatedGrid[row][col] = CellStatus.Revealed;
 
-      // Check if user won (all cells revealed except mines)
-      if (revealedCellsCount(updatedGrid) === N * M - minesCount) {
-        setGameStatus(GameStatus.Success);
+        // Check if user won (all cells revealed except mines)
+        if (revealedCellsCount(updatedGrid) === N * M - minesCount) {
+          setGameStatus(GameStatus.Success);
+        }
       }
+
+      // RIGHT CLICK: flag cell
+    } else if (e.type === 'contextmenu') {
+      e.preventDefault();
+      updatedGrid[row][col] = CellStatus.Flagged;
     }
 
     setPlayGrid(updatedGrid);
@@ -78,15 +89,17 @@ export function Grid({ N, M, minesCount }: GridProps) {
   function revealCellsRecursively(
     startingRow: number,
     startingCol: number,
-    updatedGrid: number[][]
+    updatedGrid: CellStatus[][]
   ) {
     function reveal(r: number, c: number) {
       if (r < 0 || r >= N || c < 0 || c >= M) return; // Out of range => ignore
-      if (updatedGrid[r][c] === 1) return; // Already revealed
+      if (updatedGrid[r][c] === CellStatus.Revealed) return; // Already revealed
 
-      updatedGrid[r][c] = 1; // Reveal grid
+      updatedGrid[r][c] = CellStatus.Revealed; // Reveal grid
 
       if (referenceGrid![r][c] !== 0) return; // Stop
+
+      // Otherwise, propagate reveal to all adjacent cells
       for (let i = r - 1; i <= r + 1; i++) {
         for (let j = c - 1; j <= c + 1; j++) {
           reveal(i, j);
@@ -98,11 +111,15 @@ export function Grid({ N, M, minesCount }: GridProps) {
   }
 
   function isRevealed(row: number, col: number): boolean {
-    return playGrid![row][col] === 1;
+    return playGrid![row][col] === CellStatus.Revealed;
   }
 
   function isAMine(cellValue: number) {
     return cellValue === -1;
+  }
+
+  function isFlagged(row: number, col: number): boolean {
+    return playGrid![row][col] === CellStatus.Flagged;
   }
 
   return referenceGrid === null || playGrid === null ? (
@@ -129,13 +146,19 @@ export function Grid({ N, M, minesCount }: GridProps) {
                 }
                 style={isRevealed(rowIndex, colIndex) ? { color: COLORS[cellValue] } : {}}
                 key={colIndex}
-                onClick={() => {
+                onClick={(e) => {
                   gameStatus === GameStatus.Running &&
-                    handleCellClick(cellValue, rowIndex, colIndex);
+                    handleCellClick(e, cellValue, rowIndex, colIndex);
+                }}
+                onContextMenu={(e) => {
+                  gameStatus === GameStatus.Running &&
+                    handleCellClick(e, cellValue, rowIndex, colIndex);
                 }}>
                 {isAMine(cellValue) && isRevealed(rowIndex, colIndex) ? (
                   <img className="Mine" alt="mine" src={mine} />
-                ) : cellValue === 0 ? null : (
+                ) : isFlagged(rowIndex, colIndex) ? (
+                  <img className="Flag" alt="flag" src={flag} />
+                ) : !isRevealed(rowIndex, colIndex) || cellValue === 0 ? null : (
                   cellValue
                 )}
               </div>
@@ -148,7 +171,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
 }
 
 function buildGrid(minesCoordinates: number[][], n: number, m: number): number[][] {
-  const _grid = buildNMGrid(n, m);
+  const _grid = buildNMGrid(n, m, 0);
 
   minesCoordinates.forEach(([row, col]) => {
     // Mark as mine
