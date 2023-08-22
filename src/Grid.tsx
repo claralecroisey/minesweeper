@@ -21,11 +21,15 @@ export function Grid({ N, M, minesCount }: GridProps) {
   const [minesCoordinates, setMinesCoordinates] = useState<number[][] | null>(null);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Running);
 
-  useEffect(() => {
+  function init() {
     const minesCoordinates = generateRandomPairs(minesCount, N, M);
     setMinesCoordinates(minesCoordinates);
     setReferenceGrid(buildGrid(minesCoordinates, N, M));
     setPlayGrid(buildNMGrid(N, M));
+  }
+
+  useEffect(() => {
+    init();
   }, [N, M]);
 
   function handleCellClick(cellValue: number, row: number, col: number) {
@@ -66,6 +70,7 @@ export function Grid({ N, M, minesCount }: GridProps) {
     <p>Initialising...</p>
   ) : (
     <>
+      <button onClick={init}>Restart</button>
       <div className={`GameStatus ${gameStatus}`}>
         {gameStatus === GameStatus.Failure
           ? 'GAME OVER'
